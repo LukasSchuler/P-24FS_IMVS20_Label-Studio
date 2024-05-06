@@ -16,7 +16,7 @@
     "lsf:unit": "nx run editor:unit",
     "dm:watch": "nx run datamanager:build:development --watch",
     "dm:unit": "nx run datamanager:unit",
-    "build": "NODE_ENV=production nx run-many --target=build --configuration=production",
+    "build": "cross-env NODE_ENV=production nx run-many --target=build --configuration=production",
     "version:libs": "nx run-many --target=version",
     "docs": "nx run-many --target=docs",
     "watch": "nx run-many --target=build --configuration=production --watch",
@@ -89,7 +89,8 @@
     "sanitize-html": "^2.12.1",
     "strman": "^2.0.1",
     "toml": "^3.0.0",
-    "wavesurfer.js": "^6.0.1",
+    "wavesurfer.js": "^7.7.5",
+    "colormap": "^2.3.2",
     "xpath-range": "^1.1.1",
     "zod": "^3.22.4"
   },
@@ -154,6 +155,7 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "chai": "^4.3.7",
+    "cross-env": "^7.0.3",
     "css-loader": "^5.0.1",
     "css-minimizer-webpack-plugin": "^3.0.2",
     "cypress": "^12.11.0",
@@ -227,7 +229,9 @@
         "@babel/preset-env",
         {
           "targets": {
-            "browsers": ["last 2 Chrome versions"]
+            "browsers": [
+              "last 2 Chrome versions"
+            ]
           }
         }
       ]

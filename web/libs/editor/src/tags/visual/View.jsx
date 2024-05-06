@@ -92,6 +92,7 @@ const Model = types.model({
     "video",
     "videorectangle",
     "ranker",
+    "spectrogram"
   ]),
 });
 

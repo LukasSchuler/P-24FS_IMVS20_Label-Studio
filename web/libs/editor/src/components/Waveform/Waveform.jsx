@@ -1,9 +1,8 @@
-import CursorPlugin from "wavesurfer.js/dist/plugin/wavesurfer.cursor";
 import React from "react";
 import throttle from "lodash.throttle";
 import { ZoomInOutlined, ZoomOutOutlined } from "@ant-design/icons";
-import RegionsPlugin from "wavesurfer.js/dist/plugin/wavesurfer.regions.min.js";
-import TimelinePlugin from "wavesurfer.js/dist/plugin/wavesurfer.timeline.min.js";
+import RegionsPlugin from "wavesurfer.js/dist/plugins/regions.esm";
+import TimelinePlugin from "wavesurfer.js/dist/plugins/timeline.esm";
 import WaveSurfer from "wavesurfer.js";
 import styles from "./Waveform.module.scss";
 import globalStyles from "../../styles/global.module.scss";
