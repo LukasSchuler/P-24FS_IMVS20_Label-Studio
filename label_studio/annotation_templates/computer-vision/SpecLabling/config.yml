@@ -1,0 +1,16 @@
+title: Label a spectrogram
+type: community
+group: Computer Vision
+order: 3
+image: /static/templates/spectrogram.jpg
+details: <h1>Label a spectrogram/h1>
+config: |
+  
+  
+  <View>
+    <Spectrogram name="spec" value="$spec" zoom="true" hotkey="ctrl+enter" />
+    <RectangleLabels name="label" toName="spec">
+      <Label value="Airplane" background="green"/>
+      <Label value="Car" background="blue"/>
+    </RectangleLabels>
+  </View>
