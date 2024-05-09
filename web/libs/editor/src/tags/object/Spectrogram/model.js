@@ -1,17 +1,17 @@
 // Copyright (c) 2024 FHNW, licensed under MIT License
 // Based on ../AudioNext/model.js
-import { getRoot, getType, types } from 'mobx-state-tree';
-import { customTypes } from '../../../core/CustomTypes';
-import { guidGenerator } from '../../../core/Helpers.ts';
-import { AnnotationMixin } from '../../../mixins/AnnotationMixin';
+import {getRoot, getType, types} from 'mobx-state-tree';
+import {customTypes} from '../../../core/CustomTypes';
+import {guidGenerator} from '../../../core/Helpers.ts';
+import {AnnotationMixin} from '../../../mixins/AnnotationMixin';
 import IsReadyMixin from '../../../mixins/IsReadyMixin';
 import ProcessAttrsMixin from '../../../mixins/ProcessAttrs';
-import { SyncableMixin } from '../../../mixins/Syncable';
-import { AudioRegionModel } from '../../../regions/AudioRegion';
+import {SyncableMixin} from '../../../mixins/Syncable';
+import {SpectrogramRegionModel} from '../../../regions/SpectrogramRegion';
 import Utils from '../../../utils';
-import { isDefined } from '../../../utils/utilities';
+import {isDefined} from '../../../utils/utilities';
 import ObjectBase from '../Base';
-import { WS_SPEED, WS_VOLUME, WS_ZOOM_X } from './constants';
+import {WS_SPEED, WS_VOLUME, WS_ZOOM_X} from './constants';
 
 /**
  * The Audio tag plays audio and shows its waveform. Use for audio annotation tasks where you want to label regions of audio, see the waveform, and manipulate audio during annotation.
@@ -48,6 +48,9 @@ import { WS_SPEED, WS_VOLUME, WS_ZOOM_X } from './constants';
 const TagAttrs = types.model({
   value: types.maybeNull(types.string),
   canvas: types.maybeNull(types.frozen()),
+  frequencyMin: types.maybeNull(types.number),
+  frequencyMax: types.maybeNull(types.number),
+  duration: types.maybeNull(types.number),
   muted: types.optional(types.boolean, false),
   zoom: types.optional(types.boolean, true),
   defaultzoom: types.optional(types.string, WS_ZOOM_X.default.toString()),
@@ -79,7 +82,7 @@ export const SpectrogramModel = types.compose(
     _value: types.optional(types.string, ''),
 
     playing: types.optional(types.boolean, false),
-    regions: types.array(AudioRegionModel),
+    regions: types.array(SpectrogramRegionModel),
   })
     .volatile(() => ({
       errors: [],
@@ -118,11 +121,29 @@ export const SpectrogramModel = types.compose(
           ...data,
         }, event);
       },
-        setCanvas(canvas) {
-          self.canvas = canvas;
-          console.log("Canvas is set in the model");
-        },
+      setCanvas(canvas) {
+        self.canvas = canvas;
+      },
 
+      setFrequencyMin(min) {
+        self.frequencyMin = min;
+      },
+
+      setFrequencyMax(max) {
+        self.frequencyMax = max;
+      },
+
+      calculateFrequency(y) {
+        return self.frequencyMax - (y / self.canvas.height) * self.frequencyMax - self.frequencyMin;
+      },
+
+      setDuration(duration) {
+        self.duration = duration;
+      },
+
+      calculateTime(x){
+        return (x / self.canvas.width) * self.duration;
+      },
 
       triggerSyncPlay() {
         self.triggerSync('play');
@@ -149,9 +170,10 @@ export const SpectrogramModel = types.compose(
         self._ws?.pause();
       },
 
-      handleSyncSpeed() {},
+      handleSyncSpeed() {
+      },
 
-      handleSyncSeek({ time }) {
+      handleSyncSeek({time}) {
         try {
           if (self._ws && time !== self._ws.getCurrentTime()) {
             self._ws.setCurrentTime(time);
@@ -199,27 +221,23 @@ export const SpectrogramModel = types.compose(
         self.playBackRate = val;
       },
 
-      createRegion(wsRegion, states) {
-        let bgColor = self.selectedregionbg;
-        const st = states.find(s => s.type === 'labels');
+      createRegion(region_props) {
 
-        if (st) bgColor = Utils.Colors.convertToRGBA(st.getSelectedColor(), 0.3);
-
-        const r = AudioRegionModel.create({
-          id: wsRegion.id ? wsRegion.id : guidGenerator(),
-          pid: wsRegion.pid ? wsRegion.pid : guidGenerator(),
-          parentID: wsRegion.parent_id === null ? '' : wsRegion.parent_id,
-          start: wsRegion.start,
-          end: wsRegion.end,
-          score: wsRegion.score,
-          readonly: wsRegion.readonly,
-          regionbg: self.regionbg,
-          selectedregionbg: bgColor,
-          normalization: wsRegion.normalization,
-          states,
+        const r = SpectrogramRegionModel.create({
+          id: guidGenerator(),
+          pid: guidGenerator(),
+          readonly: false,
+          x: region_props.x,
+          y: region_props.y,
+          width: region_props.width,
+          height: region_props.height,
+          start: region_props.start,
+          end: region_props.end,
+          frequencyMin: region_props.frequencyMin,
+          frequencyMax: region_props.frequencyMax,
         });
 
-        r._ws_region = wsRegion;
+        console.log(r);
 
         self.regions.push(r);
         self.annotation.addRegion(r);
@@ -282,7 +300,7 @@ export const SpectrogramModel = types.compose(
       },
 
       handleSpeed(speed) {
-        self.triggerSync('speed', { speed });
+        self.triggerSync('speed', {speed});
       },
 
       createWsRegion(region) {

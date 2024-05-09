@@ -68,29 +68,15 @@ export default class SpectrogramView extends Component {
       this.wavesurfer.zoom(this.state.zoomLevel);
       this.overlay_canvas.width = this.spec_canvas.width;
       this.overlay_canvas.height = this.spec_canvas.height;
-      this.props.onCanvasCreated(this.overlay_canvas);
+      this.props.setCanvas(this.overlay_canvas);
+      this.props.setDuration(this.wavesurfer.getDuration());
+    });
+    this.wavesurfer.on('init', () => {
+      this.props.setFreqMin(this.spec_plugin.frequencyMin);
+      this.props.setFreqMax(this.spec_plugin.frequencyMax);
     });
 
   }
-
-
-  calculateFrequency = (y, canvasHeight) => {
-    return this.spec_plugin.frequencyMax - (y / canvasHeight) * this.spec_plugin.frequencyMax - this.spec_plugin.frequencyMin;
-  };
-
-  calculateTime = (x, canvasWidth) => {
-    return (x / canvasWidth) * this.wavesurfer.getDuration();
-  };
-
-  logTimeAndFrequency = (x, y, width, height, canvasHeight, canvasWidth) => {
-    const frequencyEnd = this.calculateFrequency(y, canvasHeight);
-    const frequencyStart = this.calculateFrequency(y + height, canvasHeight);
-    const timeStart = this.calculateTime(x, canvasWidth);
-    const timeEnd = this.calculateTime(x + width, canvasWidth);
-
-
-    console.log(`Time: ${timeStart} - ${timeEnd}, Frequency: ${frequencyStart} - ${frequencyEnd}`);
-  };
 
   startDrawing = (event) => {
     const boundingRect = this.overlay_canvas.getBoundingClientRect();
@@ -100,6 +86,8 @@ export default class SpectrogramView extends Component {
     this.setState({ isDrawing: true });
   };
   draw = (event) => {
+    const states = this.props.item.activeStates();
+    if (states.length === 0) return;
     if (!this.state.isDrawing) return;
 
     const canvas = this.overlay_canvas;
@@ -113,14 +101,10 @@ export default class SpectrogramView extends Component {
 
     ctx.beginPath();
 
-    this.logTimeAndFrequency(this.startX, this.startY,x - this.startX, y - this.startY, canvas.height, canvas.width);
-
     ctx.rect(this.startX, this.startY, x - this.startX, y - this.startY);
     ctx.fill();
     ctx.stroke();
-  };
-
-  finishDrawing = () => {
+    this.props.finishDrawing(this.startX, this.startY, x - this.startX, y - this.startY);
     this.setState({ isDrawing: false });
   };
 

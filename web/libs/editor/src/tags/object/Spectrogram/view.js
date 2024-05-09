@@ -9,9 +9,38 @@ import AudioControls from '../Audio/Controls';
 import { getEnv } from 'mobx-state-tree';
 
 const HtxSpectrogramView = ({ store, item }) => {
+
   if (!item._value) return null;
   const messages = getEnv(store).messages;
 
+  const finishDrawing = (startX, startY, width, height) => {
+
+    const region_props = {
+      x: startX,
+      y: startY,
+      width: width,
+      height: height,
+      start: item.calculateTime(startX),
+      end: item.calculateTime(startX + width),
+      frequencyMin: item.calculateFrequency(startY + height),
+      frequencyMax: item.calculateFrequency(startY),
+    };
+
+    const states = item.activeStates();
+    const region = item.createRegion(region_props);
+
+    console.log(region);
+
+    if (states.length > 0) {
+      console.log("1");
+      const control = states[states.length - 1];
+      console.log("2");
+      const labels = {[control.valueType]: control.selectedValues()};
+      console.log("3");
+      item.annotation.createResult(region, labels, control, item);
+      console.log("4");
+    }
+  }
 
 
   return (
@@ -25,7 +54,11 @@ const HtxSpectrogramView = ({ store, item }) => {
           src={item._value}
           muted={item.muted}
           item={item}
-          onCanvasCreated={item.setCanvas}
+          finishDrawing={finishDrawing}
+          setCanvas={item.setCanvas}
+          setFreqMin={item.setFrequencyMin}
+          setFreqMax={item.setFrequencyMax}
+          setDuration={item.setDuration}
           selectRegion={item.selectRegion}
           handlePlay={item.handlePlay}
           handleSeek={item.handleSeek}
