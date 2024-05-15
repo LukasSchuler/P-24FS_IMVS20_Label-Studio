@@ -50,6 +50,11 @@ const NodeViews = {
     icon: AudioOutlined,
   }),
 
+  SpectrogramRegionModel: NodeView({
+    name: "Spectrogram",
+    icon: AudioOutlined,
+  }),
+
   TimeSeriesRegionModel: NodeView({
     name: "TimeSeries",
     icon: LineChartOutlined,
