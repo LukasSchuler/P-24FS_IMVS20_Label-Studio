@@ -286,6 +286,7 @@ const Result = types
       const sn = getSnapshot(self);
       const { type, score, value, meta } = sn;
       const { valueType } = self.from_name;
+      console.log("im beeing serialized", self.area);
       const data = self.area ? self.area.serialize(options) : {};
       // cut off annotation id
       const id = self.area?.cleanId;

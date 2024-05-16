@@ -1,53 +1,161 @@
-import {types} from "mobx-state-tree";
+import { getRoot, types } from "mobx-state-tree";
 
+import { guidGenerator } from "../core/Helpers";
+import { AreaMixin } from "../mixins/AreaMixin";
 import NormalizationMixin from "../mixins/Normalization";
 import RegionsMixin from "../mixins/Regions";
-import {AreaMixin} from "../mixins/AreaMixin";
-import {EditableRegion} from "./EditableRegion";
+import { SpectrogramModel } from "../tags/object/Spectrogram/model";
+import { FF_LEAP_187, isFF } from "../utils/feature-flags";
 import Registry from "../core/Registry";
-import {AudioRegionModel} from "./AudioRegion/AudioRegionModel";
 
-// this type is used in auto-generated documentation
-/**
- * @example
- * {
- *   "original_length": 18,
- *   "value": {
- *     "start": 3.1,
- *     "end": 8.2,
- *     "channel": 0,
- *     "labels": ["Voice"]
- *   }
- * }
- * @typedef {Object} AudioRegionResult
- * @property {number} original_length length of the original audio (seconds)
- * @property {Object} value
- * @property {number} value.start start time of the fragment (seconds)
- * @property {number} value.end end time of the fragment (seconds)
- * @property {number} value.channel channel identifier which was targeted
- */
+export const onlyProps = (props, obj) => {
+  return Object.fromEntries(props.map((prop) => [prop, obj[prop]]));
+};
 
-const AnnotationAttrs = types.model().volatile(() => ({
-  x: types.optional(types.number, 0),
-  y: types.optional(types.number, 0),
-  width: types.optional(types.number, 0),
-  height: types.optional(types.number, 0),
-  start: types.optional(types.number, 0),
-  end: types.optional(types.number, 0),
-  frequencyMin: types.optional(types.number, 0),
-  frequencyMax: types.optional(types.number, 0),
-}));
+const Model = types
+  .model("SpectrogramRegionModel", {
+    id: types.optional(types.identifier, guidGenerator),
+    pid: types.optional(types.string, guidGenerator),
+    object: types.late(() => types.reference(SpectrogramModel)),
+    sequence: types.frozen([]),
+    start: types.optional(types.number, 0),
+    end: types.optional(types.number, 0),
+    frequencyMin: types.optional(types.number, 0),
+    frequencyMax: types.optional(types.number, 0)
+  })
+  .preProcessSnapshot((snapshot) => {
+    return { ...snapshot, sequence: snapshot.sequence || snapshot.value.sequence };
+  })
+  .volatile(() => ({
+    hideable: true,
+  }))
+  .views((self) => ({
+    get parent() {
+      return self.object;
+    },
 
-const SpectrogramRegionModel = types.compose(
-  "SpectrogramRegionModel",
-  RegionsMixin,
-  AreaMixin,
-  NormalizationMixin,
-  EditableRegion,
-  AnnotationAttrs,
-  AudioRegionModel
-);
+    get annotation() {
+      return getRoot(self)?.annotationStore?.selected;
+    },
+
+    getShape() {
+      throw new Error("Method getShape be implemented on a shape level");
+    },
+
+    getVisibility() {
+      return true;
+    },
+  }))
+  .actions((self) => ({
+    updateShape() {
+      throw new Error("Method updateShape must be implemented on a shape level");
+    },
+
+    onSelectInOutliner() {
+      if (isFF(FF_LEAP_187)) {
+        // skip video to the first frame of this region
+        // @todo hidden/disabled timespans?
+        self.object.setFrame(self.sequence[0].frame);
+      }
+    },
+
+    serialize() {
+      console.log("I'm beeing serialized");
+      const { framerate, length: framesCount } = self.object;
+      const duration = self.object?.ref?.current?.duration ?? 0;
+
+      const value = {
+        framesCount,
+        duration,
+        sequence: self.sequence.map((keyframe) => {
+          return { ...keyframe,
+            time: keyframe.frame / framerate,
+            start: keyframe.start,
+            end: keyframe.end,
+            frequencyMin: keyframe.frequencyMin,
+            frequencyMax: keyframe.frequencyMax,
+          };
+        }),
+      };
+
+      return { value };
+    },
+
+    toggleLifespan(frame) {
+      const keypoint = self.closestKeypoint(frame, true);
+
+      if (keypoint) {
+        const index = self.sequence.indexOf(keypoint);
+
+        self.sequence = [
+          ...self.sequence.slice(0, index),
+          { ...keypoint, enabled: !keypoint.enabled },
+          ...self.sequence.slice(index + 1),
+        ];
+      }
+    },
+
+    addKeypoint(frame) {
+      const sequence = Array.from(self.sequence);
+      const closestKeypoint = self.closestKeypoint(frame);
+      const newKeypoint = {
+        ...(self.getShape(frame) ??
+          closestKeypoint ?? {
+            x: 0,
+            y: 0,
+          }),
+        enabled: closestKeypoint?.enabled ?? true,
+        frame,
+      };
+
+      sequence.push(newKeypoint);
+
+      sequence.sort((a, b) => a.frame - b.frame);
+
+      self.sequence = sequence;
+
+      self.updateShape(
+        {
+          ...newKeypoint,
+        },
+        newKeypoint.frame,
+      );
+    },
+
+    removeKeypoint(frame) {
+      self.sequence = self.sequence.filter((closestKeypoint) => closestKeypoint.frame !== frame);
+    },
+
+    isInLifespan(targetFrame) {
+      const closestKeypoint = self.closestKeypoint(targetFrame);
+
+      if (closestKeypoint) {
+        const { enabled, frame } = closestKeypoint;
+
+        if (frame === targetFrame && !enabled) return true;
+        return enabled;
+      }
+      return false;
+    },
+
+    closestKeypoint(targetFrame, onlyPrevious = false) {
+      const seq = self.sequence;
+      let result;
+
+      const keypoints = seq.filter(({ frame }) => frame <= targetFrame);
+
+      result = keypoints[keypoints.length - 1];
+
+      if (!result && onlyPrevious !== true) {
+        result = seq.find(({ frame }) => frame >= targetFrame);
+      }
+
+      return result;
+    },
+  }));
+
+const SpectrogramRegionModel = types.compose("SpectrogramRegionModel", RegionsMixin, AreaMixin, NormalizationMixin, Model);
 
 Registry.addRegionType(SpectrogramRegionModel, "spectrogram");
 
-export {SpectrogramRegionModel};
+export { SpectrogramRegionModel };

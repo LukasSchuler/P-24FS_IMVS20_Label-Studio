@@ -951,6 +951,7 @@ export const Annotation = types
       // happening locally. So to reproduce you have to test in production or environment
       const area = self?.areas?.put(areaRaw);
 
+
       objectTag?.afterResultCreated?.(area);
 
       if (!area) return;
@@ -997,11 +998,14 @@ export const Annotation = types
 
     serializeAnnotation(options) {
       // return self.serialized;
-
+      console.log("Hello ");
       document.body.style.cursor = "wait";
 
       const result = self.results
-        .map((r) => r.serialize(options))
+        .map((r) => {
+          console.log(r);  // log r here
+          return r.serialize(options);
+        })
         .filter(Boolean)
         .concat(self.relationStore.serialize(options));
 

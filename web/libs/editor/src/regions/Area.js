@@ -14,6 +14,7 @@ import { BrushRegionModel } from "./BrushRegion";
 import { TimeSeriesRegionModel } from "./TimeSeriesRegion";
 import { ParagraphsRegionModel } from "./ParagraphsRegion";
 import { VideoRectangleRegionModel } from "./VideoRectangleRegion";
+import {SpectrogramRegionModel} from "./SpectrogramRegion";
 
 // general Area type for classification Results which doesn't belong to any real Area
 const ClassificationArea = types.compose(
@@ -32,8 +33,25 @@ const ClassificationArea = types.compose(
         return false;
       },
     }))
-    .actions(() => ({
-      serialize: () => ({}),
+    .actions((self) => ({
+      serialize: () => {
+        if(self.object.type !== "spectrogram") {
+          console.log("hmmmm3", self.object.type);
+          return {}
+        }
+        else {
+          console.log("hmmmm2", self.object.type);
+          const index = self.object.regions.length - 1;
+          return {
+            value: {
+              start: self.object.regions[index].start,
+              end: self.object.regions[index].end,
+              frequencyMin: self.object.regions[index].frequencyMin,
+              frequencyMax: self.object.regions[index].frequencyMax,
+            }
+          }
+        }
+      }
     })),
 );
 
@@ -58,10 +76,14 @@ const Area = types.union(
       // union of all available Areas for this Object type
 
       if (!available.length) return ClassificationArea;
+
+      console.log("hmmmm4", available);
+
       return types.union(...available, ClassificationArea);
     },
   },
   AudioRegionModel,
+  SpectrogramRegionModel,
   ParagraphsRegionModel,
   TimeSeriesRegionModel,
   RectRegionModel,
