@@ -1,18 +1,11 @@
 // Copyright (c) 2024 FHNW, licensed under MIT License
 // Based on ../AudioNext/model.js
 import {getRoot, getType, types} from 'mobx-state-tree';
-import {customTypes} from '../../../core/CustomTypes';
-import {guidGenerator} from '../../../core/Helpers.ts';
 import {AnnotationMixin} from '../../../mixins/AnnotationMixin';
 import IsReadyMixin from '../../../mixins/IsReadyMixin';
 import ProcessAttrsMixin from '../../../mixins/ProcessAttrs';
 import {SyncableMixin} from '../../../mixins/Syncable';
-import {SpectrogramRegionModel} from '../../../regions/SpectrogramRegion';
-import Utils from '../../../utils';
-import {isDefined} from '../../../utils/utilities';
 import ObjectBase from '../Base';
-import {WS_SPEED, WS_VOLUME, WS_ZOOM_X} from './constants';
-
 /**
  * The Audio tag plays audio and shows its waveform. Use for audio annotation tasks where you want to label regions of audio, see the waveform, and manipulate audio during annotation.
  *
@@ -51,22 +44,6 @@ const TagAttrs = types.model({
   frequencyMin: types.maybeNull(types.number),
   frequencyMax: types.maybeNull(types.number),
   duration: types.maybeNull(types.number),
-  muted: types.optional(types.boolean, false),
-  zoom: types.optional(types.boolean, true),
-  defaultzoom: types.optional(types.string, WS_ZOOM_X.default.toString()),
-  volume: types.optional(types.boolean, true),
-  defaultvolume: types.optional(types.string, WS_VOLUME.default.toString()),
-  speed: types.optional(types.boolean, true),
-  defaultspeed: types.optional(types.string, WS_SPEED.default.toString()),
-  hotkey: types.maybeNull(types.string),
-  showlabels: types.optional(types.boolean, false),
-  showscores: types.optional(types.boolean, false),
-  height: types.optional(types.string, '88'),
-  cursorwidth: types.optional(types.string, '2'),
-  cursorcolor: types.optional(customTypes.color, '#333'),
-  defaultscale: types.optional(types.string, '1'),
-  autocenter: types.optional(types.boolean, true),
-  scrollparent: types.optional(types.boolean, true),
 });
 
 export const SpectrogramModel = types.compose(
@@ -77,12 +54,10 @@ export const SpectrogramModel = types.compose(
   ObjectBase,
   AnnotationMixin,
   IsReadyMixin,
-  types.model('SpectrogramModel', {
-    type: 'audio',
+  types.model( {
+    type: 'spectrogram',
     _value: types.optional(types.string, ''),
-
-    playing: types.optional(types.boolean, false),
-    regions: types.array(SpectrogramRegionModel),
+    canvas: types.optional(types.boolean, false),
   })
     .volatile(() => ({
       errors: [],
@@ -110,17 +85,6 @@ export const SpectrogramModel = types.compose(
     }))
     ////// Sync actions
     .actions(self => ({
-      ////// Outgoing
-      triggerSync(event, data) {
-        if (!self._ws) return;
-
-        self.syncSend({
-          playing: self._ws.isPlaying(),
-          time: self._ws.getCurrentTime(),
-          speed: self._ws.rate ?? 1,
-          ...data,
-        }, event);
-      },
       setCanvas(canvas) {
         self.canvas = canvas;
       },
@@ -145,210 +109,33 @@ export const SpectrogramModel = types.compose(
         return (x / self.canvas.width) * self.duration;
       },
 
-      triggerSyncPlay() {
-        self.triggerSync('play');
-      },
-
-      triggerSyncPause() {
-        self.triggerSync('pause');
-      },
-
-      ////// Incoming
-      handleSyncPlay(data) {
-        if (!self._ws) return;
-        self.handleSyncSeek(data);
-        if (self._ws.isPlaying()) return;
-
-        self._ws?.play();
-      },
-
-      handleSyncPause(data) {
-        if (!self._ws) return;
-        self.handleSyncSeek(data);
-        if (!self._ws.isPlaying()) return;
-
-        self._ws?.pause();
-      },
-
-      handleSyncSpeed() {
-      },
-
-      handleSyncSeek({time}) {
-        try {
-          if (self._ws && time !== self._ws.getCurrentTime()) {
-            self._ws.setCurrentTime(time);
-          }
-        } catch (err) {
-          console.log(err);
-        }
-      },
-
-      registerSyncHandlers() {
-        self.syncHandlers.set('play', self.handleSyncPlay);
-        self.syncHandlers.set('pause', self.handleSyncPause);
-        self.syncHandlers.set('seek', self.handleSyncSeek);
-        self.syncHandlers.set('speed', self.handleSyncSpeed);
-      },
     }))
     .actions(self => ({
-      needsUpdate() {
-        self.handleNewRegions();
-      },
 
-      onReady() {
-        self.setReady(true);
-      },
+      addRegion(region_props) {
+        const control = region_props.control;
+        const labels = region_props.labels;
 
-      handleNewRegions() {
-        if (!self._ws?.isReady) return;
-        self.regs.map(reg => {
-          if (reg._ws_region) return;
-          self.createWsRegion(reg);
-        });
-      },
-
-      onHotKey(e) {
-        e && e.preventDefault();
-        self._ws.playPause();
-        return false;
-      },
-
-      setRangeValue(val) {
-        self.rangeValue = val;
-      },
-
-      setPlaybackRate(val) {
-        self.playBackRate = val;
-      },
-
-      createRegion(region_props) {
-
-        const r = SpectrogramRegionModel.create({
-          id: guidGenerator(),
-          pid: guidGenerator(),
-          readonly: false,
+        if (!control) {
+          console.error("NO CONTROL");
+          return;
+        }
+        const areaValue = {
           x: region_props.x,
           y: region_props.y,
           width: region_props.width,
           height: region_props.height,
-          start: region_props.start,
-          end: region_props.end,
-          frequencyMin: region_props.frequencyMin,
-          frequencyMax: region_props.frequencyMax,
-        });
-
-        console.log(r);
-
-        self.regions.push(r);
-        self.annotation.addRegion(r);
-
-        return r;
-      },
-
-      selectRange(ev, ws_region) {
-        const selectedRegions = self.regs.filter(r => r.start >= ws_region.start && r.end <= ws_region.end);
-
-        ws_region.remove && ws_region.remove();
-        if (!selectedRegions.length) return;
-        // @todo: needs preventing drawing with ctrl pressed
-        // if (ev.ctrlKey || ev.metaKey) {
-        //   self.annotation.extendSelectionWith(selectedRegions);
-        //   return;
-        // }
-        self.annotation.selectAreas(selectedRegions);
-      },
-
-      addRegion(wsRegion) {
-        // area id is assigned to WS region during deserealization
-        const find_r = self.annotation.areas.get(wsRegion.id);
-
-        if (find_r) {
-          find_r.applyCSSClass(wsRegion);
-
-          find_r._ws_region = wsRegion;
-          return find_r;
+          start: self.calculateTime(region_props.x),
+          end: self.calculateTime(region_props.x + region_props.width),
+          frequencyMin: self.calculateFrequency(region_props.y),
+          frequencyMax: self.calculateFrequency(region_props.y +  region_props.height)
         }
 
-        const states = self.getAvailableStates();
+        const area = self.annotation.createResult(areaValue, labels, control, self);
 
-        if (states.length === 0) {
-          wsRegion.on('update-end', ev => self.selectRange(ev,wsRegion));
-          return;
-        }
 
-        const control = self.activeStates()[0];
-        const labels = { [control.valueType]: control.selectedValues() };
-        const r = self.annotation.createResult(wsRegion, labels, control, self);
-
-        r._ws_region = wsRegion;
-        r.updateAppearenceFromState();
-        return r;
+        return area;
       },
 
-      /**
-       * Play and stop
-       */
-      handlePlay() {
-        if (self._ws) {
-          self.playing = !self.playing;
-          self._ws.isPlaying() ? self.triggerSync('play') : self.triggerSync('pause');
-        }
-      },
-
-      handleSeek() {
-        self.triggerSync('seek');
-      },
-
-      handleSpeed(speed) {
-        self.triggerSync('speed', {speed});
-      },
-
-      createWsRegion(region) {
-        const _regionOptions = region.wsRegionOptions;
-
-        if (region.annotation.isReadOnly()) {
-          _regionOptions.drag = false;
-          _regionOptions.resize = false;
-        }
-
-        const r = self._ws.addRegion(region.wsRegionOptions);
-
-        region._ws_region = r;
-        region.updateAppearenceFromState();
-      },
-
-      onLoad(ws) {
-        self._ws = ws;
-        const history = self.annotation.history;
-
-        self.regs.forEach(reg => {
-          self.createWsRegion(reg);
-        });
-
-
-        // In cases where we do skipNextUndoState on region creation, we need to make sure
-        // that we don't skip the next undo state after it is resolved entirely.
-        setTimeout(() => history.setSkipNextUndoState(false), 0);
-      },
-
-      onError(error) {
-        self.errors = [error];
-      },
-
-      wsCreated(ws) {
-        self._ws = ws;
-      },
-
-      beforeDestroy() {
-        try {
-          if (isDefined(self._ws)) {
-            self._ws.destroy();
-            self._ws = null;
-          }
-        } catch (err) {
-          self._ws = null;
-          console.warn('Already destroyed');
-        }
-      },
     })),
 );

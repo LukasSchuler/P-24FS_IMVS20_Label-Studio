@@ -15,31 +15,26 @@ const HtxSpectrogramView = ({ store, item }) => {
 
   const finishDrawing = (startX, startY, width, height) => {
 
+    let control = null;
+    let labels = null;
+    let states = item.activeStates();
+
+    if (states.length > 0) {
+      control = states[states.length - 1];
+      labels = {[control.valueType]: control.selectedValues()};
+    }
+
     const region_props = {
       x: startX,
       y: startY,
       width: width,
       height: height,
-      start: item.calculateTime(startX),
-      end: item.calculateTime(startX + width),
-      frequencyMin: item.calculateFrequency(startY + height),
-      frequencyMax: item.calculateFrequency(startY),
+      control: control,
+      labels: labels,
     };
 
-    const states = item.activeStates();
-    const region = item.createRegion(region_props);
+    item.addRegion(region_props);
 
-    console.log(region);
-
-    if (states.length > 0) {
-      console.log("1");
-      const control = states[states.length - 1];
-      console.log("2");
-      const labels = {[control.valueType]: control.selectedValues()};
-      console.log("3");
-      item.annotation.createResult(region, labels, control, item);
-      console.log("4");
-    }
   }
 
 

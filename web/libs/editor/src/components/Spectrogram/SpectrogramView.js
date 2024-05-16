@@ -62,7 +62,6 @@ export default class SpectrogramView extends Component {
 
     this.overlay_canvas.addEventListener('mousedown', this.startDrawing);
     this.overlay_canvas.addEventListener('mouseup', this.draw);
-    this.overlay_canvas.addEventListener('mouseleave', this.finishDrawing);
 
     this.wavesurfer.on('ready', () => {
       this.wavesurfer.zoom(this.state.zoomLevel);
