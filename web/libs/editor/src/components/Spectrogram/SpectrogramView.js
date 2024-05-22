@@ -69,6 +69,7 @@ export default class SpectrogramView extends Component {
       this.overlay_canvas.height = this.spec_canvas.height;
       this.props.setCanvas(this.overlay_canvas);
       this.props.setDuration(this.wavesurfer.getDuration());
+      this.drawRegions(this.props.regions);
     });
     this.wavesurfer.on('init', () => {
       this.props.setFreqMin(this.spec_plugin.frequencyMin);
@@ -105,6 +106,20 @@ export default class SpectrogramView extends Component {
     ctx.stroke();
     this.props.finishDrawing(this.startX, this.startY, x - this.startX, y - this.startY);
     this.setState({ isDrawing: false });
+  };
+
+  drawRegions = (regions) => {
+    console.log('');
+    this.props.addRectangles(regions);
+    this.props.getRectangles().forEach((rect) => {
+      const ctx = this.overlay_canvas.getContext('2d');
+      ctx.fillStyle = 'rgba(255, 255, 255, 0)';
+      ctx.strokeStyle = 'white';
+      ctx.beginPath();
+      ctx.rect(rect.x, rect.y, rect.width, rect.height);
+      ctx.fill();
+      ctx.stroke();
+    });
   };
 
   handleSpeedChange = (event) => {

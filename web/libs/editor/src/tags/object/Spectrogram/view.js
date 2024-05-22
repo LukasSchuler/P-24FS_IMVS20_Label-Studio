@@ -13,6 +13,17 @@ const HtxSpectrogramView = ({ store, item }) => {
   if (!item._value) return null;
   const messages = getEnv(store).messages;
 
+  const addRectangles = (regions) => {
+    regions.forEach((region) => {
+      item.rectangles.push({
+        x: item.calculateXFromTime(region.start),
+        y: item.calculateYFromFrequency(region.frequencyMax),
+        width: item.calculateWidth(region.start, region.end),
+        height: item.calculateHeight(region.frequencyMin, region.frequencyMax),
+      });
+    });
+  }
+
   const finishDrawing = (startX, startY, width, height) => {
 
     let control = null;
@@ -68,11 +79,13 @@ const HtxSpectrogramView = ({ store, item }) => {
           defaultSpeed={Number(item.defaultspeed)}
           defaultZoom={Number(item.defaultzoom)}
           volume={item.volume}
-          regions={true}
+          regions={item.regions()}
           height={item.height}
           cursorColor={item.cursorcolor}
           cursorWidth={item.cursorwidth}
           messages={messages}
+          addRectangles={addRectangles}
+          getRectangles={item.getRectangles}
         />
 
         <AudioControls item={item} store={store} />

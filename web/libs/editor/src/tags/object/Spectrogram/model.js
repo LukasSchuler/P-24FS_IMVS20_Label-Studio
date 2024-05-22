@@ -38,6 +38,13 @@ import ObjectBase from '../Base';
  * @param {boolean} [autocenter=true] – Always place cursor in the middle of the view
  * @param {boolean} [scrollparent=true] – Wave scroll smoothly follows the cursor
  */
+const Rectangle = types.model({
+  x: types.number,
+  y: types.number,
+  width: types.number,
+  height: types.number,
+});
+
 const TagAttrs = types.model({
   value: types.maybeNull(types.string),
   canvas: types.maybeNull(types.frozen()),
@@ -57,6 +64,7 @@ export const SpectrogramModel = types.compose(
   types.model( {
     type: 'spectrogram',
     _value: types.optional(types.string, ''),
+    rectangles: types.array(Rectangle)
   })
     .volatile(() => ({
       errors: [],
@@ -72,8 +80,16 @@ export const SpectrogramModel = types.compose(
         return getRoot(self);
       },
 
+      regions() {
+        return self.annotation.areas;
+      },
+
       states() {
         return self.annotation.toNames.get(self.name);
+      },
+
+      getRectangles() {
+        return self.rectangles;
       },
 
       activeStates() {
@@ -107,6 +123,26 @@ export const SpectrogramModel = types.compose(
       calculateTime(x){
         return (x / self.canvas.width) * self.duration;
       },
+
+      calculateYFromFrequency(f) {
+        return ((self.frequencyMax - f - self.frequencyMin) * self.canvas.height) / self.frequencyMax;
+      },
+
+      calculateXFromTime(t) {
+        return (t * self.canvas.width) / self.duration;
+      },
+
+      calculateWidth(startTime, endTime) {
+        const xStart = this.calculateXFromTime(startTime);
+        const xEnd = this.calculateXFromTime(endTime);
+        return xEnd - xStart;
+      },
+
+      calculateHeight(frequencyMin, frequencyMax) {
+        const yMin = this.calculateYFromFrequency(frequencyMax);
+        const yMax = this.calculateYFromFrequency(frequencyMin);
+        return yMax - yMin;
+      }
 
     }))
     .actions(self => ({
