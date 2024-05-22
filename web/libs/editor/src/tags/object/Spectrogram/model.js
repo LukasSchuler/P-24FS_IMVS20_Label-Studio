@@ -57,7 +57,6 @@ export const SpectrogramModel = types.compose(
   types.model( {
     type: 'spectrogram',
     _value: types.optional(types.string, ''),
-    canvas: types.optional(types.boolean, false),
   })
     .volatile(() => ({
       errors: [],
@@ -120,6 +119,7 @@ export const SpectrogramModel = types.compose(
           console.error("NO CONTROL");
           return;
         }
+
         const areaValue = {
           x: region_props.x,
           y: region_props.y,
@@ -127,12 +127,11 @@ export const SpectrogramModel = types.compose(
           height: region_props.height,
           start: self.calculateTime(region_props.x),
           end: self.calculateTime(region_props.x + region_props.width),
-          frequencyMin: self.calculateFrequency(region_props.y),
-          frequencyMax: self.calculateFrequency(region_props.y +  region_props.height)
+          frequencyMin: self.calculateFrequency(region_props.y +  region_props.height),
+          frequencyMax: self.calculateFrequency(region_props.y)
         }
 
         const area = self.annotation.createResult(areaValue, labels, control, self);
-
 
         return area;
       },

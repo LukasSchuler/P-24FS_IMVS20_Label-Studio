@@ -8,7 +8,6 @@ import { AreaMixin } from "../mixins/AreaMixin";
 import NormalizationMixin from "../mixins/Normalization";
 import RegionsMixin from "../mixins/Regions";
 import { SpectrogramModel } from "../tags/object/Spectrogram/model";
-import { FF_LEAP_187, isFF } from "../utils/feature-flags";
 import Registry from "../core/Registry";
 
 export const onlyProps = (props, obj) => {
@@ -50,7 +49,15 @@ const Model = types
   .actions((self) => ({
 
     serialize() {
-      ///TODO: needs to be implemented
+      console.log("SpectrogramRegionModel serialize");
+        return {
+          value: {
+            start: self.start,
+            end: self.end,
+            frequencyMin: self.frequencyMin,
+            frequencyMax: self.frequencyMax,
+          }
+        }
     },
 
   }));
