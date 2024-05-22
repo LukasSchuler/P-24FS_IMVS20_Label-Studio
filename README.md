@@ -1,8 +1,22 @@
-<img src="https://user-images.githubusercontent.com/12534576/192582340-4c9e4401-1fe6-4dbb-95bb-fdbba5493f61.png"/>
+<img src="https://user-images.githubusercontent.com/12534576/192582340-4c9e4401-1fe6-4dbb-95bb-fdbba5493f61.png" alt="" />
 
 
 # MITWELTEN
 
+Yarn global installieren:
+
+```bash
+npm install --global yarn
+yarn --version
+```
+
+NPM Dependencies installieren:
+
+```bash
+cd web
+yarn install --frozen-lockfile
+cd ..
+```
 
 Kontinuierliches Front-End Buildscript starten:
 
@@ -19,11 +33,13 @@ Erstelle Docker Container mit folder mounts (Linux/Mac):
 ```bash
 docker run -it -p 8080:8080 -v ./web/dist:/label-studio/web/dist -v ./label_studio/annotation_templates:/label-studio/label_studio/annotation_templates -v ./label_studio/core/static/templates:/label-studio/label_studio/core/static/templates heartexlabs/label-studio:latest
 ```
+- Nun den **static_build** Ordner des Repositories in den **label_studio/core/** Ordner des Docker-Containers kopieren.
 
-Danach Docker Container starten und auf http://localhost:8080/ gehen.
+
+- Danach Docker Container starten und auf http://localhost:8080/ gehen.
 
 
-## DIR Links
+## Directory Links
 
 ### Spectrogramm
 
@@ -49,7 +65,7 @@ Danach Docker Container starten und auf http://localhost:8080/ gehen.
 - Rectangle
 - RectangleLabels
 
-[web/editor/src/tags/MIXINS](web/libs/editor/src/tags/mixins)
+[web/editor/src/mixins](web/libs/editor/src/mixins)
 
 - KonvaRegion
 - LabelMixin
