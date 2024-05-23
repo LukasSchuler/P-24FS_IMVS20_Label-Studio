@@ -14,14 +14,7 @@ const HtxSpectrogramView = ({ store, item }) => {
   const messages = getEnv(store).messages;
 
   const addRectangles = (regions) => {
-    regions.forEach((region) => {
-      item.rectangles.push({
-        x: item.calculateXFromTime(region.start),
-        y: item.calculateYFromFrequency(region.frequencyMax),
-        width: item.calculateWidth(region.start, region.end),
-        height: item.calculateHeight(region.frequencyMin, region.frequencyMax),
-      });
-    });
+    item.addRectangles(regions);
   }
 
   const finishDrawing = (startX, startY, width, height) => {
@@ -44,7 +37,7 @@ const HtxSpectrogramView = ({ store, item }) => {
       labels: labels,
     };
 
-    item.addRegion(region_props);
+    return item.addRegion(region_props);
 
   }
 

@@ -96,25 +96,26 @@ export default class SpectrogramView extends Component {
     const x = event.clientX - boundingRect.left;
     const y = event.clientY - boundingRect.top;
 
+    const region = this.props.finishDrawing(this.startX, this.startY, x - this.startX, y - this.startY);
+
     ctx.fillStyle = 'rgba(255, 255, 255, 0)';
-    ctx.strokeStyle = 'white';
+    ctx.strokeStyle = region.style.strokecolor;
 
     ctx.beginPath();
 
     ctx.rect(this.startX, this.startY, x - this.startX, y - this.startY);
     ctx.fill();
     ctx.stroke();
-    this.props.finishDrawing(this.startX, this.startY, x - this.startX, y - this.startY);
     this.setState({ isDrawing: false });
   };
 
   drawRegions = (regions) => {
-    console.log('');
     this.props.addRectangles(regions);
     this.props.getRectangles().forEach((rect) => {
       const ctx = this.overlay_canvas.getContext('2d');
       ctx.fillStyle = 'rgba(255, 255, 255, 0)';
-      ctx.strokeStyle = 'white';
+      ctx.strokeStyle = rect.color;
+      ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.rect(rect.x, rect.y, rect.width, rect.height);
       ctx.fill();

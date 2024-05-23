@@ -43,6 +43,7 @@ const Rectangle = types.model({
   y: types.number,
   width: types.number,
   height: types.number,
+  color: types.string
 });
 
 const TagAttrs = types.model({
@@ -172,5 +173,16 @@ export const SpectrogramModel = types.compose(
         return area;
       },
 
+      addRectangles(regions) {
+        regions.forEach((region) => {
+          self.getRectangles().push({
+            x: self.calculateXFromTime(region.start),
+            y: self.calculateYFromFrequency(region.frequencyMax),
+            width: self.calculateWidth(region.start, region.end),
+            height: self.calculateHeight(region.frequencyMin, region.frequencyMax),
+            color: region.style.strokecolor
+          });
+        });
+      },
     })),
 );
