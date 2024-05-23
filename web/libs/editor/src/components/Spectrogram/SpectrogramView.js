@@ -108,7 +108,7 @@ export default class SpectrogramView extends Component {
     ctx.clearRect(0, 0, this.overlay_canvas.width, this.overlay_canvas.height);
     this.props.getRectangles().forEach((rect) => {
       ctx.lineWidth = 3;
-      ctx.fillStyle = 'rgba(255, 255, 255, 0)';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
       ctx.strokeStyle = rect.color;
       ctx.beginPath();
       ctx.rect(rect.x, rect.y, rect.width, rect.height);
@@ -149,7 +149,7 @@ export default class SpectrogramView extends Component {
     const { playbackSpeed, zoomLevel } = this.state;
     return (
       <div>
-        <div id="wave" ref={this.wsRef} />
+        <div id="wave" ref={this.wsRef} style={{ cursor: 'crosshair' }} />
         <h1>Controls</h1>
         <div style={{ display: 'flex' }}>
           <div>
