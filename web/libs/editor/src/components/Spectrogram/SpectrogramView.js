@@ -3,6 +3,7 @@
 import React, { Component } from 'react';
 import SpectrogramPlugin from "wavesurfer.js/dist/plugins/spectrogram.esm";
 import WaveSurfer from 'wavesurfer.js';
+import {onSnapshot} from "mobx-state-tree";
 
 export default class SpectrogramView extends Component {
   constructor(props) {
@@ -76,6 +77,7 @@ export default class SpectrogramView extends Component {
       this.props.setFreqMax(this.spec_plugin.frequencyMax);
     });
 
+    this.props.item.annotation.startAutosave();
   }
 
   startDrawing = (event) => {
@@ -90,38 +92,34 @@ export default class SpectrogramView extends Component {
     if (states.length === 0) return;
     if (!this.state.isDrawing) return;
 
-    const canvas = this.overlay_canvas;
-    const ctx = canvas.getContext('2d');
-    const boundingRect = canvas.getBoundingClientRect();
-    const x = event.clientX - boundingRect.left;
-    const y = event.clientY - boundingRect.top;
+     const canvas = this.overlay_canvas;
+     const boundingRect = canvas.getBoundingClientRect();
+     const x = event.clientX - boundingRect.left;
+     const y = event.clientY - boundingRect.top;
 
     const region = this.props.finishDrawing(this.startX, this.startY, x - this.startX, y - this.startY);
-
-    ctx.fillStyle = 'rgba(255, 255, 255, 0)';
-    ctx.strokeStyle = region.style.strokecolor;
-
-    ctx.beginPath();
-
-    ctx.rect(this.startX, this.startY, x - this.startX, y - this.startY);
-    ctx.fill();
-    ctx.stroke();
+    this.props.addRegion(region);
     this.setState({ isDrawing: false });
   };
 
   drawRegions = (regions) => {
     this.props.addRectangles(regions);
+    const ctx = this.overlay_canvas.getContext('2d');
+    ctx.clearRect(0, 0, this.overlay_canvas.width, this.overlay_canvas.height);
     this.props.getRectangles().forEach((rect) => {
-      const ctx = this.overlay_canvas.getContext('2d');
+      ctx.lineWidth = 3;
       ctx.fillStyle = 'rgba(255, 255, 255, 0)';
       ctx.strokeStyle = rect.color;
-      ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.rect(rect.x, rect.y, rect.width, rect.height);
       ctx.fill();
       ctx.stroke();
     });
   };
+
+  regionObserver =onSnapshot(this.props.item.annotation, () => {
+    this.drawRegions(this.props.regions);
+  });
 
   handleSpeedChange = (event) => {
     const newSpeed = parseFloat(event.target.value);

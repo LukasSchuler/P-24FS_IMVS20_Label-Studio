@@ -43,7 +43,7 @@ const Rectangle = types.model({
   y: types.number,
   width: types.number,
   height: types.number,
-  color: types.string
+  color: types.string,
 });
 
 const TagAttrs = types.model({
@@ -168,19 +168,18 @@ export const SpectrogramModel = types.compose(
           frequencyMax: self.calculateFrequency(region_props.y)
         }
 
-        const area = self.annotation.createResult(areaValue, labels, control, self);
-
-        return area;
+        self.annotation.createResult(areaValue, labels, control, self);
       },
 
       addRectangles(regions) {
+        self.rectangles = [];
         regions.forEach((region) => {
-          self.getRectangles().push({
+          self.rectangles.push({
             x: self.calculateXFromTime(region.start),
             y: self.calculateYFromFrequency(region.frequencyMax),
             width: self.calculateWidth(region.start, region.end),
             height: self.calculateHeight(region.frequencyMin, region.frequencyMax),
-            color: region.style.strokecolor
+            color: region.highlighted?"white":region.style.strokecolor,
           });
         });
       },

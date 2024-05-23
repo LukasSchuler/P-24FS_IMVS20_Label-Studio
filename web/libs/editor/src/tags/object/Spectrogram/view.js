@@ -5,7 +5,6 @@ import { Fragment } from 'react';
 import { ErrorMessage } from '../../../components/ErrorMessage/ErrorMessage';
 import ObjectTag from '../../../components/Tags/Object';
 import SpectrogramView from '../../../components/Spectrogram/SpectrogramView';
-import AudioControls from '../Audio/Controls';
 import { getEnv } from 'mobx-state-tree';
 
 const HtxSpectrogramView = ({ store, item }) => {
@@ -79,9 +78,9 @@ const HtxSpectrogramView = ({ store, item }) => {
           messages={messages}
           addRectangles={addRectangles}
           getRectangles={item.getRectangles}
+          annAreas={item.annotation.areas}
         />
 
-        <AudioControls item={item} store={store} />
         <div style={{ marginBottom: '4px' }}></div>
       </Fragment>
     </ObjectTag>
