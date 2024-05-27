@@ -3,6 +3,8 @@
 
 # MITWELTEN
 
+## SETUP
+
 Yarn global installieren:
 
 ```bash
@@ -18,14 +20,7 @@ yarn install --frozen-lockfile
 cd ..
 ```
 
-Kontinuierliches Front-End Buildscript starten:
-
-```bash
-cd web
-yarn lsf:watch
-```
-
-Erstelle Docker Container mit folder mounts (Windows): 
+Erstelle Docker Container mit folder mounts (Windows):
 ```bash
 docker run -it -p 8080:8080 -v .\web\dist:/label-studio/web/dist -v .\label_studio\annotation_templates:/label-studio/label_studio/annotation_templates -v .\label_studio\core\static\templates:/label-studio/label_studio/core/static/templates heartexlabs/label-studio:latest
 ```
@@ -35,6 +30,16 @@ docker run -it -p 8080:8080 -v ./web/dist:/label-studio/web/dist -v ./label_stud
 ```
 - Nun den **static_build** Ordner des Repositories in den **label_studio/core/** Ordner des Docker-Containers kopieren.
 
+
+
+## RUN DEV-MODUS
+
+Kontinuierliches Front-End Buildscript starten:
+
+```bash
+cd web
+yarn lsf:watch
+```
 
 - Danach Docker Container starten und auf http://localhost:8080/ gehen.
 
