@@ -76,8 +76,6 @@ export default class SpectrogramView extends Component {
       this.props.setFreqMin(this.spec_plugin.frequencyMin);
       this.props.setFreqMax(this.spec_plugin.frequencyMax);
     });
-
-    this.props.item.annotation.startAutosave();
   }
 
   startDrawing = (event) => {
@@ -97,8 +95,7 @@ export default class SpectrogramView extends Component {
      const x = event.clientX - boundingRect.left;
      const y = event.clientY - boundingRect.top;
 
-    const region = this.props.finishDrawing(this.startX, this.startY, x - this.startX, y - this.startY);
-    this.props.addRegion(region);
+    this.props.finishDrawing(this.startX, this.startY, x - this.startX, y - this.startY);
     this.setState({ isDrawing: false });
   };
 
@@ -119,7 +116,21 @@ export default class SpectrogramView extends Component {
 
   regionObserver =onSnapshot(this.props.item.annotation, () => {
     this.drawRegions(this.props.regions);
+    this.scrollToSelectedRegion();
   });
+
+  scrollToSelectedRegion = () => {
+    let currentRegion = null;
+
+    this.props.item.annotation.areas.forEach((area) => {
+      if(area.highlighted) {
+        currentRegion = area;
+      }
+      if (currentRegion) {
+        this.wavesurfer.setScrollTime(currentRegion.start - 0.5);
+      }
+    });
+  };
 
   handleSpeedChange = (event) => {
     const newSpeed = parseFloat(event.target.value);
