@@ -31,11 +31,11 @@ export default class SpectrogramView extends Component {
       labelsColor: "white",
       labelsHzColor: "white",
       height: 256,
-      splitChannels: true,
+      splitChannels: false,
       colorMap: colors,
       frequencyMin: 0,
       frequencyMax: 125000,
-      fftSamples: 1024,
+      fftSamples: 512,
     });
 
     this.wavesurfer = WaveSurfer.create({
@@ -45,6 +45,7 @@ export default class SpectrogramView extends Component {
       url: this.props.src,
       mediaControls: true,
       sampleRate: 250000,
+      splitChannels: false,
       height: 0,
       plugins: [
         this.spec_plugin
