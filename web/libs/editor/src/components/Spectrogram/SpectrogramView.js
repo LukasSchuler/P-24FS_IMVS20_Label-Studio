@@ -12,7 +12,8 @@ export default class SpectrogramView extends Component {
       playbackSpeed: 1.0,
       zoomLevel: 1000,
       spec_plugin: null,
-      isDrawing: false // New state to track drawing status
+      isDrawing: false,
+      maxFreq: 125000,
     };
     this.wsRef = React.createRef();
   }
@@ -104,6 +105,11 @@ export default class SpectrogramView extends Component {
     this.props.addRectangles(regions);
     const ctx = this.overlay_canvas.getContext('2d');
     ctx.clearRect(0, 0, this.overlay_canvas.width, this.overlay_canvas.height);
+    const lineInterval = this.overlay_canvas.height * 25000 / this.state.maxFreq;
+    for (let y = 0; y < this.overlay_canvas.height; y += lineInterval) {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.strokeRect(0, y, this.overlay_canvas.width, 0);
+    }
     this.props.getRectangles().forEach((rect) => {
       ctx.lineWidth = 3;
       ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
@@ -142,7 +148,7 @@ export default class SpectrogramView extends Component {
   };
 
   handleZoomIn = () => {
-    const newZoomLevel = this.state.zoomLevel + 50;
+    const newZoomLevel = this.state.zoomLevel + 250;
     this.setState({ zoomLevel: newZoomLevel });
     if (this.wavesurfer) {
       this.wavesurfer.zoom(newZoomLevel);
