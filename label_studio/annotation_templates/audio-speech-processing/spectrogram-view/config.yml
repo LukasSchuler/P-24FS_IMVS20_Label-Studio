@@ -5,9 +5,12 @@ image: /static/templates/spectrogram.jpg
 details: <h1>Provide transcript for the audio</h1>
 config: |
   <View>
-    <Spectrogram name="spec" value="$spec" zoom="true" hotkey="ctrl+enter" />
-    <Header value="Provide Transcription" />
-    <TextArea name="transcription" toName="spec"
-              rows="4" editable="true" maxSubmissions="1" />
+     <Labels name="labels" toName="spec">
+      <Label value="Mopsfledermaus" />
+      <Label value="Mückenfledermaus" />
+    </Labels>
+  
+    <Spectrogram name="spec" value="$audio" />
+  
   </View>
 

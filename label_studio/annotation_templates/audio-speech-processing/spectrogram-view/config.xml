@@ -1,9 +1,12 @@
 <View>
-  <Spectrogram name="spec" value="$spec" zoom="true" hotkey="ctrl+enter" />
-  <Header value="Provide Transcription" />
-  <TextArea name="transcription" toName="spec" rows="4" editable="true" maxSubmissions="1" />
-</View>
+  <Labels name="labels" toName="spec">
+    <Label value="Mopsfledermaus" />
+    <Label value="Mückenfledermaus" />
+  </Labels>
 
+  <Spectrogram name="spec" value="$audio" />
+
+</View>
 <!-- { "data":
 
 {"audio": "/static/samples/game.wav"},

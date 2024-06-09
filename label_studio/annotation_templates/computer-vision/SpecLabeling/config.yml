@@ -4,6 +4,7 @@ group: Computer Vision
 order: 3
 image: /static/templates/spectrogram.jpg
 details: <h1>Label a spectrogram/h1>
+audio: /static/samples/game.wav
 config: |
   
   
@@ -13,6 +14,6 @@ config: |
       <Label value="Mückenfledermaus" />
     </Labels>
  
-    <Spectrogram name="spec" value="$spec" zoom="true" hotkey="ctrl+enter" />
+    <Spectrogram name="spec" value="$audio" />
   
   </View>
