@@ -7,22 +7,4 @@
   <Spectrogram name="spec" value="$audio" />
 
 </View>
-<!-- { "data":
 
-{"audio": "/static/samples/game.wav"},
-"annotations": [{
-"result": [
-    {
-        "value": {
-            "text": [
-                "Wow wow wow!... "
-            ]
-        },
-        "id": "hj0mP4gEC1",
-        "from_name": "transcription",
-        "to_name": "audio",
-        "type": "textarea"
-    }
-]
-}]
-} -->
