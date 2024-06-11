@@ -31,12 +31,12 @@ export default class SpectrogramView extends Component {
       labels: true,
       labelsColor: "white",
       labelsHzColor: "white",
-      height: 256,
+      height: 512,
       splitChannels: false,
       colorMap: colors,
       frequencyMin: 0,
       frequencyMax: 125000,
-      fftSamples: 512,
+      fftSamples: 1024,
     });
 
     this.wavesurfer = WaveSurfer.create({
@@ -168,7 +168,6 @@ export default class SpectrogramView extends Component {
     return (
       <div>
         <div id="wave" ref={this.wsRef} style={{ cursor: 'crosshair' }} />
-        <h1>Controls</h1>
         <div style={{ display: 'flex' }}>
           <div>
             <div>
