@@ -55,8 +55,8 @@ export default class SpectrogramView extends Component {
 
     this.spec_canvas = this.spec_plugin.canvas;
     this.overlay_canvas = document.createElement('canvas');
-    this.overlay_canvas.style.position = 'absolute'; // Ensure overlay canvas is positioned absolutely
-    this.overlay_canvas.style.top = '0'; // Adjust top position to match spectrogram canvas
+    this.overlay_canvas.style.position = 'absolute';
+    this.overlay_canvas.style.top = '0';
     this.overlay_canvas.style.left = '0';
     this.overlay_canvas.style.width = '100%';
     this.overlay_canvas.style.height = '100%';
