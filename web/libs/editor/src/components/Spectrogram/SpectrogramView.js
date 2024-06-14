@@ -31,12 +31,12 @@ export default class SpectrogramView extends Component {
       labels: true,
       labelsColor: "white",
       labelsHzColor: "white",
-      height: 256,
+      height: 512,
       splitChannels: false,
       colorMap: colors,
       frequencyMin: 0,
       frequencyMax: 125000,
-      fftSamples: 512,
+      fftSamples: 1024,
     });
 
     this.wavesurfer = WaveSurfer.create({
