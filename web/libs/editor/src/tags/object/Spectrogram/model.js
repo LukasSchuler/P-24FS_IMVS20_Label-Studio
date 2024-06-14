@@ -7,36 +7,24 @@ import ProcessAttrsMixin from '../../../mixins/ProcessAttrs';
 import {SyncableMixin} from '../../../mixins/Syncable';
 import ObjectBase from '../Base';
 /**
- * The Audio tag plays audio and shows its waveform. Use for audio annotation tasks where you want to label regions of audio, see the waveform, and manipulate audio during annotation.
+ * The Spectrogram tag plays Audio while simulatneously displaying the frequency spectrum of the audio.
  *
  * Use with the following data types: audio
  * @example
- * <!--Labeling configuration to label regions of audio and rate the audio sample-->
+ * <!--Labeling configuration to label Regions of the spectrogram-image with rectangular labels-->
  * <View>
- *   <Labels name="lbl-1" toName="audio-1">
- *     <Label value="Guitar" />
- *     <Label value="Drums" />
+ *   <Labels name="labels" toName="spec">
+ *     <Label value="Bat" />
+ *     <Label value="Car" />
  *   </Labels>
- *   <Rating name="rate-1" toName="audio-1" />
- *   <Audio name="audio-1" value="$audio" />
+ *   <Spectrogram name="spec" value="$audio" />
  * </View>
- * @meta_title Audio Tag for Audio Labeling
- * @meta_description Customize Label Studio with the Audio tag for advanced audio annotation tasks for machine learning and data science projects.
+ * @meta_title Spectrogram Component for Audio Frequency Analysis
+ * @meta_description Spectrogram Component for Visualizing and Analyzing Audio Frequencies
  * @param {string} name - Name of the element
  * @param {string} value - Data field containing path or a URL to the audio
- * @param {boolean=} [volume=false] - Whether to show a volume slider (from 0 to 1)
- * @param {string} [defaultvolume=1] - Default volume level (from 0 to 1)
- * @param {boolean} [speed=false] - Whether to show a speed slider (from 0.5 to 3)
  * @param {string} [defaultspeed=1] - Default speed level (from 0.5 to 2)
- * @param {boolean} [zoom=true] - Whether to show the zoom slider
  * @param {string} [defaultzoom=1] - Default zoom level (from 1 to 1500)
- * @param {string} [hotkey] - Hotkey used to play or pause audio
- * @param {string} [sync] object name to sync with
- * @param {string} [cursorwidth=1] - Audio pane cursor width. it's Measured in pixels.
- * @param {string} [cursorcolor=#333] - Audio pane cursor color. Color should be specify in hex decimal string
- * @param {string} [defaultscale=1] - Audio pane default y-scale for waveform
- * @param {boolean} [autocenter=true] – Always place cursor in the middle of the view
- * @param {boolean} [scrollparent=true] – Wave scroll smoothly follows the cursor
  */
 const Rectangle = types.model({
   x: types.number,
