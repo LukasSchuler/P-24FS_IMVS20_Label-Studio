@@ -28,8 +28,9 @@ Erstelle Docker Container mit folder mounts (Linux/Mac):
 ```bash
 docker run -it -p 8080:8080 -v ./web/dist:/label-studio/web/dist -v ./label_studio/annotation_templates:/label-studio/label_studio/annotation_templates -v ./label_studio/core/static/templates:/label-studio/label_studio/core/static/templates heartexlabs/label-studio:latest
 ```
-- Nun den **static_build** Ordner des Repositories in den **label_studio/core/** Ordner des Docker-Containers kopieren.
 
+- Nun den **[static_build](additions/static_build)** Ordner des Repositories in den **label_studio/core/** Ordner des Docker-Containers kopieren.
+  
 
 
 ## RUN DEV-MODUS
@@ -46,7 +47,7 @@ yarn lsf:watch
 
 ## Directory Links
 
-### Spectrogramm
+### Spectrogramm-spezifisch
 
 [web/libs/editor/src/components/Spectrogram](web/libs/editor/src/components/Spectrogram)
 
@@ -58,11 +59,21 @@ yarn lsf:watch
 - Spectrogram/index.js
 - Spectrogram/model.js
 
-### Sonstige
-
 [web/libs/editor/src/regions](web/libs/editor/src/regions)
 
-- Versch. Regions
+- SpectrogramRegion.js
+
+[additions/static_build](additions/static_build)
+
+- static_build Ordner zum Kopieren in den Docker-Container
+
+[label_studio/annotation_templates/audio-speech-processing/spectrogram-view](label_studio/annotation_templates/audio-speech-processing/spectrogram-view)
+
+- config.xml
+- config.yaml
+
+### Sonstige
+
 
 
 [web/editor/src/tags/CONTROL](web/libs/editor/src/tags/control)
