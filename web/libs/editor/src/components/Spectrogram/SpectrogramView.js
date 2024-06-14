@@ -9,7 +9,7 @@ export default class SpectrogramView extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      playbackSpeed: 0.1,
+      playbackSpeed: 1.0,
       zoomLevel: 1000,
       spec_plugin: null,
       isDrawing: false,
@@ -35,7 +35,7 @@ export default class SpectrogramView extends Component {
       splitChannels: false,
       colorMap: colors,
       frequencyMin: 0,
-      frequencyMax: this.maxFreq,
+      frequencyMax: 125000,
       fftSamples: 512,
     });
 
